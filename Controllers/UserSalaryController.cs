@@ -109,14 +109,38 @@ namespace DotnetAPI.Controllers
              ) VALUES (" +
                 "'" + UserSalary.Salary +
                     "', '" + UserSalary.AverageSalary +
-    "')";       
+    "')";
                 if (_dapper.ExecuteSql(sql))
                 {
                     return Ok();
                 }
                 return NotFound("Failed to Add Salary");
             }
-            catch (Exception ex) { 
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error Getting Salary: {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error. Please try again later");
+            }
+        }
+
+        [HttpDelete("DeleteSalary")]
+        // Grab user id and delete salary by id
+        public IActionResult DeleteSalary(int userId)
+        {
+            try
+            {
+                string sql = @"
+                DELETE
+                    FROM TutorialAppSchema.UserSalary
+                WHERE UserId = " + userId.ToString();
+                if (_dapper.ExecuteSql(sql))
+                {
+                    return Ok();
+                }
+                return NotFound("Failed to Delete Salary");
+            }
+            catch (Exception ex)
+            {
                 Console.WriteLine($"Error Getting Salary: {ex.Message}");
                 return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error. Please try again later");
             }
