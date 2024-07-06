@@ -10,11 +10,11 @@ using Microsoft.AspNetCore.Mvc;
 namespace DotnetAPI.Controllers;
 [ApiController]
 [Route("[controller]")]
-public class UserEFController : ControllerBase
+public class UserJobEFController : ControllerBase
 {
     IMapper _mapper;
     DataContextEF _entity;
-    public UserEFController(IConfiguration config)
+    public UserJobEFController(IConfiguration config)
     {
         _entity = new DataContextEF(config);
         _mapper = new Mapper(new MapperConfiguration(cfg => {

@@ -88,5 +88,45 @@ namespace DotnetAPI.Controllers
         }
         //Update - Update Table and Update New Values of Rows
         // Fanilly Specifiy Where
+        [HttpPut("EditJob")]
+        public IActionResult EditJob(UserJobInfo userJob)
+        {
+            try 
+            {
+                string sql = @"
+                    UPDATE TutorialAppSchema.UserJobInfo
+                    SET [JobTitle] = '" + userJob.JobTitle + 
+                    "', [Department] = '" + userJob.Department + 
+                    "' WHERE UserId = " + userJob.UserId; 
+                    if (_dapper.ExecuteSql(sql))
+                    {
+                        return Ok();
+                    }
+                    return NotFound("Job not found");
+            } catch (Exception ex)
+            {
+                Console.WriteLine($"Error when going to edit job, {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error. Please try again later.");
+            }
+        }
+        [HttpDelete("DeleteJob")]
+        public IActionResult DeleteJob(int userId)
+        {
+            try 
+            {
+                string sql = @"
+                    DELETE TutorialAppSchema.UserJobInfo
+                    WHERE UserId = " + userId.ToString();
+                if(_dapper.ExecuteSql(sql))
+                {
+                    return Ok();
+                }
+                return NotFound("Job Not Found");
+            } catch (Exception ex)
+            {
+                Console.WriteLine($"Error when going to edit job, {ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error. Please try again later.");
+            }
+        }
     }
 }
