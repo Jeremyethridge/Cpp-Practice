@@ -20,6 +20,7 @@ namespace DotnetAPI.Controllers
         }
 
         [HttpGet("GetSalary")]
+        
         public IActionResult GetSalary()
         {
             try
@@ -45,7 +46,9 @@ namespace DotnetAPI.Controllers
             }
         }
 
-        [HttpGet("GetSingleSalary/userId")]
+        [HttpGet("GetSingleSalary/{userId}")]
+        // Public IEnumerable<UserSalary> GetSingleSalary (int userId)
+        // just return _dapper.LoadDataSingle<Model>(sql statement)
         public IActionResult GetSingleSalary(int userId)
         {
             try
@@ -123,7 +126,7 @@ namespace DotnetAPI.Controllers
             }
         }
 
-        [HttpDelete("DeleteSalary")]
+        [HttpDelete("DeleteSalary/{userId}")]
         // Grab user id and delete salary by id
         public IActionResult DeleteSalary(int userId)
         {

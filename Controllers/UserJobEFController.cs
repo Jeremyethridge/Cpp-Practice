@@ -52,8 +52,9 @@ public class UserJobEFController : ControllerBase
 
         if (userJob != null)
         {
-            userJob.JobTitle = job.JobTitle;
-            userJob.Department = job.Department;
+            _mapper.Map(userJob, job);
+            // userJob.JobTitle = job.JobTitle;
+            // userJob.Department = job.Department;
             if (_entity.SaveChanges() > 0)
             {
                 return Ok();

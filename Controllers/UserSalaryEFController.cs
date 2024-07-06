@@ -49,8 +49,10 @@ public class UserSalaryEFController : ControllerBase
         .FirstOrDefault<UserSalary>();
         if (editSalary != null)
         {
-            editSalary.Salary = salary.Salary;
-            editSalary.AverageSalary = salary.AverageSalary;
+            // Mapping
+             _mapper.Map(salary, editSalary); //Faster and uses Map  
+            // editSalary.Salary = salary.Salary;
+            // editSalary.AverageSalary = salary.AverageSalary;
 
             if (_entity.SaveChanges() > 0)
             {
