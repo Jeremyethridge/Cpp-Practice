@@ -25,12 +25,14 @@ namespace DotnetAPI.Controllers
                 cfg.CreateMap<UserSalaryToAddDto, UserSalary>();
             }));
         }
+        
         [HttpGet("GetSalariesEF")]
         public IEnumerable<UserSalary> GetSalaries()
         {
             IEnumerable<UserSalary> salaries = _userRepository.GetUserSalaries();
             return salaries;
         }
+
         [HttpGet("GetSingleSalaryEF/{userId}")]
         public UserSalary GetSingleSalary(int userId)
         {
@@ -43,7 +45,7 @@ namespace DotnetAPI.Controllers
             UserSalary? editSalary = _userRepository.GetSingleUserSalary(salary.UserId);
             if (editSalary != null)
             {
-                _mapper.Map(editSalary, salary);
+                _mapper.Map(salary, editSalary);
                 if (_userRepository.SaveChanges())
                 {
                     return Ok();
@@ -53,7 +55,7 @@ namespace DotnetAPI.Controllers
             return NotFound("Failed find Salary");
         }
         [HttpPost("AddSalaryEF")]
-        public IActionResult AddSalary(UserJobInfoToAddDto salary)
+        public IActionResult AddSalary(UserSalaryToAddDto salary)
     {
         UserSalary userSalary = _mapper.Map<UserSalary>(salary);
         _userRepository.AddEntity<UserSalary>(userSalary);

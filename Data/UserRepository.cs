@@ -32,39 +32,50 @@ namespace DotnetAPI.Data
             IEnumerable<User> users = _entity.Users.ToList<User>();
             return users;
         }
-         public User GetSingleUser(int userId)
-    {
-        User? user = _entity.Users
-        .Where(u => u.UserId == userId)
-        .FirstOrDefault<User>();
-        if (user != null)
-        {
-            return user;
-        }
-        throw new Exception("Failed to Get User");
-    }
-         public UserJobInfo GetSingleUserJob(int userId)
-    {
-        UserJobInfo? job = _entity.UserJobInfo
-        .Where(u => u.UserId == userId)
-        .FirstOrDefault<UserJobInfo>();
-        if (job != null)
-        {
-            return job;
-        }
-        throw new Exception("Failed to Get job");
-    }
 
-         public UserSalary GetSingleUserSalary(int userId)
-    {
-        UserSalary? salary = _entity.UserSalary
-        .Where(u => u.UserId == userId)
-        .FirstOrDefault<UserSalary>();
-        if (salary != null)
+        public IEnumerable<UserJobInfo> GetUserJobs()
         {
+            IEnumerable<UserJobInfo> jobs = _entity.UserJobInfo.ToList<UserJobInfo>();
+            return jobs;
+        }
+        public IEnumerable<UserSalary> GetUserSalaries()
+        {
+            IEnumerable<UserSalary> salary = _entity.UserSalary.ToList<UserSalary>();
             return salary;
         }
-        throw new Exception("Failed to Get User");
+        public User GetSingleUser(int userId)
+        {
+            User? user = _entity.Users
+            .Where(u => u.UserId == userId)
+            .FirstOrDefault<User>();
+            if (user != null)
+            {
+                return user;
+            }
+            throw new Exception("Failed to Get User");
+        }
+        public UserJobInfo GetSingleUserJob(int userId)
+        {
+            UserJobInfo? job = _entity.UserJobInfo
+            .Where(u => u.UserId == userId)
+            .FirstOrDefault<UserJobInfo>();
+            if (job != null)
+            {
+                return job;
+            }
+            throw new Exception("Failed to Get job");
+        }
+
+        public UserSalary GetSingleUserSalary(int userId)
+        {
+            UserSalary? salary = _entity.UserSalary
+            .Where(u => u.UserId == userId)
+            .FirstOrDefault<UserSalary>();
+            if (salary != null)
+            {
+                return salary;
+            }
+            throw new Exception("Failed to Get User");
+        }
     }
-}
 }
