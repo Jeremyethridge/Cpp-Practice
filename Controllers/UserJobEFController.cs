@@ -18,45 +18,42 @@ public class UserJobEFController : ControllerBase
     {
         _entity = new DataContextEF(config);
         _mapper = new Mapper(new MapperConfiguration(cfg => {
-            cfg.CreateMap<UserToAddDto, User>();
+            cfg.CreateMap<UserJobInfoToAddDto, UserJobInfo>();
         }));
     }
 
-    [HttpGet("GetUsers")]
-    public IEnumerable<User> GetUsers()
+    [HttpGet("GetUsersEF")]
+    public IEnumerable<UserJobInfo> GetUsers()
     {
-        IEnumerable<User> users = _entity.Users.ToList<User>();
-        return users;
+        IEnumerable<UserJobInfo> userJobs = _entity.UserJobInfo.ToList<UserJobInfo>();
+        return userJobs;
     }
 
-    [HttpGet("GetSingleUser/{userId}")]
+    [HttpGet("GetSingleJobEF")]
     // public IActionResult Test()
-    public IActionResult GetSingleUser(int userId)
+    public IActionResult GetSingleJob(int userId)
     {
-        User? user = _entity.Users
+        UserJobInfo? job = _entity.UserJobInfo
         .Where(u => u.UserId == userId)
-        .FirstOrDefault<User>();
-        if (user != null)
+        .FirstOrDefault<UserJobInfo>();
+        if (job != null)
         {
-            return Ok(user);
+            return Ok(job);
         }
         return NotFound("Failed to Get User");
     }
 
-    [HttpPut("EditUser")]
-    public IActionResult EditUser(User user)
+    [HttpPut("EditUserEF")]
+    public IActionResult EditUser(UserJobInfo job)
     {
-        User? userDB = _entity.Users
-        .Where(u => u.UserId == user.UserId)
-        .FirstOrDefault<User>();
+        UserJobInfo? userJob = _entity.UserJobInfo
+        .Where(u => u.UserId == job.UserId)
+        .FirstOrDefault<UserJobInfo>();
 
-        if (userDB != null)
+        if (userJob != null)
         {
-            userDB.Active = user.Active;
-            userDB.FirstName = user.FirstName;
-            userDB.LastName = user.LastName;
-            userDB.Email = user.Email;
-            userDB.Gender = user.Gender;
+            userJob.JobTitle = job.JobTitle;
+            userJob.Department = job.Department;
             if (_entity.SaveChanges() > 0)
             {
                 return Ok();
@@ -66,11 +63,11 @@ public class UserJobEFController : ControllerBase
         return NotFound("Failed to Get User");
     }
 
-    [HttpPost("AddUser")]
-    public IActionResult AddUser(UserToAddDto user)
+    [HttpPost("AddUserEF")]
+    public IActionResult AddUser(UserJobInfoToAddDto job)
     {
-        User userDB = _mapper.Map<User>(user);
-        _entity.Add(userDB);
+        UserJobInfo userJob = _mapper.Map<UserJobInfo>(job);
+        _entity.Add(userJob);
         if (_entity.SaveChanges() > 0)
         {
             return Ok();
@@ -79,16 +76,16 @@ public class UserJobEFController : ControllerBase
     }
 
 
-    [HttpDelete("DeleteUser/{userId}")]
+    [HttpDelete("DeleteUserEF/{userId}")]
     public IActionResult DeleteUser(int userId)
     {
-        User? userDB = _entity.Users
+        UserJobInfo? userJob = _entity.UserJobInfo
         .Where(u => u.UserId == userId)
-        .FirstOrDefault<User>();
+        .FirstOrDefault<UserJobInfo>();
 
-        if (userDB != null)
+        if (userJob != null)
         {
-            _entity.Users.Remove(userDB);
+            _entity.UserJobInfo.Remove(userJob);
             if (_entity.SaveChanges() > 0)
             {
                 return Ok();

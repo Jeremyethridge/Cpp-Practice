@@ -16,7 +16,7 @@ public class UserSalaryEFController : ControllerBase
     DataContextEF _entity;
     public UserSalaryEFController(IConfiguration config)
     {
-        _entity = new DataContextEF(config)
+        _entity = new DataContextEF(config);
         _mapper = new Mapper(new MapperConfiguration(cfg =>
         {
             cfg.CreateMap<UserSalaryToAddDto, UserSalary>();
@@ -64,7 +64,7 @@ public class UserSalaryEFController : ControllerBase
     public IActionResult AddSalary(UserSalaryToAddDto salary)
     {
         UserSalary userSalary = _mapper.Map<UserSalary>(salary);
-        _entity.Add(salary);
+        _entity.Add(userSalary);
         if (_entity.SaveChanges() > 0)
         {
             return Ok();
