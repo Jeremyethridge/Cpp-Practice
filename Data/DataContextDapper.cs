@@ -36,7 +36,7 @@ namespace DotnetAPI.Data
             IDbConnection dbConnection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
             return dbConnection.Execute(sql);
         }
-        public int ExecuteSqlWithParameters(string sql, List<SqlParameter> parameters)
+        public bool ExecuteSqlWithParameters(string sql, List<SqlParameter> parameters)
         {
 
             SqlCommand commandWithParams = new SqlCommand(sql);
@@ -54,9 +54,7 @@ namespace DotnetAPI.Data
             int rowsAffected = commandWithParams.ExecuteNonQuery();
 
             dbConnection.Close();
-            return rowsAffected;
+            return rowsAffected > 0;
         }
-
-        
     }
 }
