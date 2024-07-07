@@ -15,12 +15,6 @@ public class UserController : ControllerBase
         _dapper = new DataContextDapper(config);
     }
 
-    [HttpGet("TestConnection")]
-    public DateTime TestConnect()
-    {
-        return _dapper.LoadDataSingle<DateTime>("SELECT GETDATE()");
-    }
-
     [HttpGet("GetUsers")]
     // public IActionResult Test()
     public IEnumerable<User> GetUsers()
