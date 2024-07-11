@@ -6,7 +6,9 @@ using System.Security.Cryptography.Xml;
 using System.Text;
 using DotnetAPI.Data;
 using DotnetAPI.Dtos;
+using DotnetAPI.Helpers;
 using DotnetAPI.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
@@ -14,16 +16,19 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace DotnetAPI.Controllers
 {
-    public class AuthController : ControllerBase
+    [Authorize]
+    [ApiController]
+    [Route("[controller]")]
+     public class AuthController : ControllerBase
     {
         private readonly DataContextDapper _dapper;
-        private readonly IConfiguration _config;
+        private readonly AuthHelper _authHelper;
         public AuthController(IConfiguration config)
         {
             _dapper = new DataContextDapper(config);
-            _config = config;
+            _authHelper = new AuthHelper(config);
         }
-
+        [AllowAnonymous]
         [HttpPost("Register")]
         public IActionResult Register(UserForRegistrationDTO userForRegistration)
         {
@@ -41,7 +46,7 @@ namespace DotnetAPI.Controllers
                         rng.GetNonZeroBytes(passwordSalt);
                     }
 
-                    byte[] passwordHash = GetPasswordHash(userForRegistration.Password, passwordSalt);
+                    byte[] passwordHash = _authHelper.GetPasswordHash(userForRegistration.Password, passwordSalt);
 
                     string sqlAddAuth = @"INSERT INTO TutorialAppSchema.Auth ([Email],
                                     [PasswordHash],
@@ -86,7 +91,7 @@ namespace DotnetAPI.Controllers
             }
             throw new Exception("Passwords do not match");
         }
-
+        [AllowAnonymous]
         [HttpPost("Login")]
         public IActionResult Login(UserForLoginDTO userForLogin)
         {
@@ -96,7 +101,7 @@ namespace DotnetAPI.Controllers
                                     WHERE Email = '" + userForLogin.Email + "'";
             UserForLoginConfirmationDTO userForConfirmation = _dapper.LoadDataSingle<UserForLoginConfirmationDTO>(sqlForHashAndSalt);
 
-            byte[] passwordHash = GetPasswordHash(userForLogin.Password, userForConfirmation.PasswordSalt);
+            byte[] passwordHash = _authHelper.GetPasswordHash(userForLogin.Password, userForConfirmation.PasswordSalt);
 
             for (int i = 0; i < passwordHash.Length; i++)
             {
@@ -113,51 +118,23 @@ namespace DotnetAPI.Controllers
             int userId = _dapper.LoadDataSingle<int>(userIdSql);
 
             return Ok(new Dictionary<string, string> {
-                {"token", CreateToken(userId)}
+                {"token", _authHelper.CreateToken(userId)}
             });
         }
 
-        private byte[] GetPasswordHash(string password, byte[] passwordSalt)
+        [HttpGet("RefreshToken")]
+        public IActionResult RefreshToken()
         {
-            string passwordSaltPlusString = _config.GetSection("AppSettings:PasswordKey").Value + Convert.ToBase64String(passwordSalt);
+            string userId = User.FindFirst("userId")?.Value + "";
+           
+            string userIdSql = "SELECT UserId FROM TutorialAppSchema.Users WHERE UserId = "
+            + userId;
+            int userIdFromDB = _dapper.LoadDataSingle<int>(userIdSql);
 
-            return KeyDerivation.Pbkdf2(
-            password: password,
-            salt: Encoding.ASCII.GetBytes(passwordSaltPlusString),
-            prf: KeyDerivationPrf.HMACSHA512,
-            iterationCount: 1000,
-            numBytesRequested: 256 / 8
-        );
+            return Ok(new Dictionary<string, string> {
+                {"token", _authHelper.CreateToken(userIdFromDB)}
+            });
         }
 
-        private string CreateToken(int userId)
-        {
-            Claim[] claims = new Claim[]
-            {
-                new Claim("userId", userId.ToString())
-            };
-
-
-            string? tokenKeyString = _config.GetSection("AppSettings:Token").Value;
-            SymmetricSecurityKey tokenKey = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(
-                    tokenKeyString != null ? tokenKeyString : "234123901u9305jfifpiofqwefijfsdflkxcvx234123901u9305jfifpiofqwefijfsdflkxcvxxcvx"
-                )
-            );
-                 SigningCredentials credentials = new SigningCredentials(tokenKey, SecurityAlgorithms.HmacSha512Signature);
-
-                 SecurityTokenDescriptor descripter = new SecurityTokenDescriptor()
-                 {
-                    Subject = new ClaimsIdentity(claims),
-                    SigningCredentials = credentials,
-                    Expires = DateTime.Now.AddDays(1)
-                 };
-
-                 JwtSecurityTokenHandler Tokenhandler = new JwtSecurityTokenHandler();
-
-                 SecurityToken token = Tokenhandler.CreateToken(descripter);
-
-                 return Tokenhandler.WriteToken(token);
-        }
     }
 }
