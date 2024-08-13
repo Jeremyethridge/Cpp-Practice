@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace DotnetAPI.Controllers
 {
-    [Authorize]
+    // [Authorize]
     [ApiController]
     [Route("[Controller]")]
     public class PostController : ControllerBase
@@ -17,46 +17,34 @@ namespace DotnetAPI.Controllers
             _dapper = new DataContextDapper(config);
         }
 
-        [HttpGet("Posts")]
-        public IEnumerable<Post> GetPosts()
+        [HttpGet("Posts/{postId}/{userId}/{searchParam}")]
+        public IEnumerable<Post> GetPosts(int postId, int userId, string searchParam = "None")
         {
-            string sql = @"
-                        SELECT [PostId],
-                        [UserId],
-                        [PostTitle],
-                        [PostContent],
-                        [PostCreated],
-                        [PostUpdated] FROM TutorialAppSchema.Posts";
+            string sql = @"EXEC TutorialAppSchema.spPosts_Get";
+            string parameters = "";
+
+            if (postId != 0)
+            {
+                parameters += ", @PostId =" + postId.ToString(); 
+            }
+            if (userId != 0)
+            {
+                parameters = ", @UserId =" + userId.ToString();
+            }
+            if (searchParam != "None")
+            {
+                parameters += ", @searchValue='" + searchParam + "'";
+            }
+
+            if (parameters.Length > 0){
+
+            sql += parameters.Substring(1);
+            }
+
             return _dapper.LoadData<Post>(sql);
         }
 
-        [HttpGet("PostSingle/{postId}")]
-        public Post GetSinglePost(int postId)
-        {
-            string sql = @"
-                        SELECT [PostId],
-                        [UserId],
-                        [PostTitle],
-                        [PostContent],
-                        [PostCreated],
-                        [PostUpdated] FROM TutorialAppSchema.Posts
-                        WHERE PostId = " + postId.ToString();
-            return _dapper.LoadDataSingle<Post>(sql);
-        }
-
-        [HttpGet("PostsByUser/{userId}")]
-        public IEnumerable<Post> PostsByUser(int userId)
-        {
-            string sql = @"
-                        SELECT [PostId],
-                        [UserId],
-                        [PostTitle],
-                        [PostContent],
-                        [PostCreated],
-                        [PostUpdated] FROM TutorialAppSchema.Posts
-                        WHERE UserId = " + userId.ToString();
-            return _dapper.LoadData<Post>(sql);
-        }
+       
         [HttpGet("MyPost/{userId}")]
         public IEnumerable<Post> GetMyPost()
         {
@@ -120,20 +108,6 @@ namespace DotnetAPI.Controllers
                 return Ok();
             }
             throw new Exception("Failed to Delete Post");
-        }
-        [HttpGet("PostsBySearch/{searchParam}")]
-        public IEnumerable<Post> PostsBySearch(string searchParam)
-        {
-            string sql = @"
-                        SELECT [PostId],
-                        [UserId],
-                        [PostTitle],
-                        [PostContent],
-                        [PostCreated],
-                        [PostUpdated] FROM TutorialAppSchema.Posts
-                        WHERE PostTitle LIKE '%" + searchParam + "%'" +
-                            " OR PostContent LIKE '%" + searchParam + "%'";
-            return _dapper.LoadData<Post>(sql);
         }
     }
 }
