@@ -16,54 +16,6 @@ namespace DotnetAPI.Controllers
             _dapper = new DataContextDapper(config);
         }
 
-        [HttpGet("GetJobInfo")]
-        public IActionResult GetJobInfo()
-        {
-            try
-            {
-                string sql = @"
-                    SELECT [UserId],
-                        [JobTitle],
-                        [Department] 
-                    FROM TutorialAppSchema.UserJobInfo
-            ";
-                IEnumerable<UserJobInfo> Jobs = _dapper.LoadData<UserJobInfo>(sql);
-                if (Jobs == null)
-                {
-                    return NotFound("No Jobs Found");
-                }
-                return Ok(Jobs);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error retrieving Jobs, {ex.Message}");
-                return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error. Please try again later");
-            }
-        }
-        [HttpGet("SingleJob")]
-        public IActionResult GetSingleJob(int userId)
-        {
-            try
-            {
-                string sql = @"
-                SELECT  [UserId],
-                        [JobTitle],
-                        [Department] 
-                FROM TutorialAppSchema.UserJobInfo
-                WHERE UserId = " + userId.ToString();
-                UserJobInfo Job = _dapper.LoadDataSingle<UserJobInfo>(sql);
-                if (Job == null)
-                {
-                    return NotFound("No Job Was found");
-                }
-                return Ok(Job);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error retrieving Jobs, {ex.Message}");
-                return StatusCode(StatusCodes.Status500InternalServerError, "Internal Server Error. Please try again later");
-            }
-        }
         [HttpPost("AddJob")]
         public IActionResult AddJob(UserJobInfoToAddDto job)
         {

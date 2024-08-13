@@ -22,50 +22,6 @@ public class UserJobEFController : ControllerBase
         }));
     }
 
-    [HttpGet("GetUserJobs")]
-    public IEnumerable<UserJobInfo> GetUserJobs()
-    {
-        IEnumerable<UserJobInfo> userJobs = _userRepository.GetUserJobs();
-        return userJobs;
-    }
-
-    [HttpGet("GetSingleJobEF")]
-    // public IActionResult Test()
-    public UserJobInfo GetSingleJob(int userId)
-    {
-       return  _userRepository.GetSingleUserJob(userId);
-    }
-
-    [HttpPut("EditUserEF")]
-    public IActionResult EditUser(UserJobInfo job)
-    {
-        UserJobInfo? userJob = _userRepository.GetSingleUserJob(job.UserId);
-
-        if (userJob != null)
-        {
-            _mapper.Map(userJob, job);
-            if (_userRepository.SaveChanges())
-            {
-                return Ok();
-            }
-            return StatusCode(StatusCodes.Status500InternalServerError, "Failed to Update User");
-        }
-        return NotFound("Failed to Get User");
-    }
-
-    [HttpPost("AddUserEF")]
-    public IActionResult AddUser(UserJobInfoToAddDto job)
-    {
-        UserJobInfo userJob = _mapper.Map<UserJobInfo>(job);
-        _userRepository.AddEntity<UserJobInfo>(userJob);
-        if (_userRepository.SaveChanges())
-        {
-            return Ok();
-        }
-        return StatusCode(StatusCodes.Status500InternalServerError, "Failed to Add User");
-    }
-
-
     [HttpDelete("DeleteUserJobEF/{userId}")]
     public IActionResult DeleteUser(int userId)
     {

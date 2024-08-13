@@ -15,44 +15,43 @@ public class UserCompleteController : ControllerBase
         _dapper = new DataContextDapper(config);
     }
 
-    [HttpGet("GetUsers{userId}")]
+    [HttpGet("GetUsers{userId}/{isActive}")]
     // public IActionResult Test()
-    public IEnumerable<UserComplete> GetUsers(int userId)
+    public IEnumerable<UserComplete> GetUsers(int userId, bool isActive)
     {
-        string sql = @"
-        EXEC TutorialAppSchema.spUsers_Get @UserId =" + userId.ToString();
+        string sql = @"EXEC TutorialAppSchema.spUsers_Get";
+        string parameters = "";
+
+        if (userId != 0)
+        {
+            parameters += ", @UserId =" + userId.ToString();
+        }
+        if (isActive)
+        {
+            parameters += ", @Active =" + isActive.ToString();
+        }
+
+        sql += parameters.Substring(1);
+
         IEnumerable<UserComplete> users = _dapper.LoadData<UserComplete>(sql);
         return users;
     }
 
-    [HttpGet("GetSingleUser/{userId}")]
-    // public IActionResult Test()
-    public User GetSingleUser(int userId)
-    {
-        string sql = @"
-        SELECT [UserId]
-             ,[FirstName]
-             ,[LastName]
-            , [Email]
-            , [Gender]
-            , [Active]
-        FROM TutorialAppSchema.Users
-            WHERE UserId = " + userId.ToString();
-        User user = _dapper.LoadDataSingle<User>(sql);
-        return user;
-    }
 
-    [HttpPut("EditUser")]
-    public IActionResult EditUser(User user)
+    [HttpPut("UpsertUser")]
+    public IActionResult UpsertUser(UserComplete user)
     {
-        string sql = @"
-        UPDATE TutorialAppSchema.Users
-                SET [FirstName] = '" + user.FirstName +
-                 "', [LastName] = '" + user.LastName +
-                 "', [Email] =  '" + user.Email +
-                "', [Gender] =  '" + user.Gender +
-                 "', [Active] = '" + user.Active +
-                 "' WHERE UserId = " + user.UserId;
+        string sql = @"EXEC TutorialAppSchema.spUser_Upsert
+                     @FirstName = '" + user.FirstName +
+                 "', @LastName = '" + user.LastName +
+                 "', @Email =  '" + user.Email +
+                "',  @Gender =  '" + user.Gender +
+                 "', @Active = '" + user.Active +
+                 "', @JobTitle = '" + user.JobTitle +
+                 "', @Department = '" + user.Department +
+                 "', @Salary = '" + user.Salary +
+                 "', @UserId = " + user.UserId;
+        
         if (_dapper.ExecuteSql(sql))
         {
             return Ok();
@@ -60,35 +59,11 @@ public class UserCompleteController : ControllerBase
         throw new Exception("Failed to Update User");
     }
 
-    [HttpPost("AddUser")]
-    public IActionResult AddUser(UserToAddDto user)
-    {
-        string sql = @"
-        INSERT INTO TutorialAppSchema.Users(
-            [FirstName],
-            [LastName],
-            [Email],
-            [Gender],
-            [Active]
-    ) VALUES (" +
-            "'" + user.FirstName +
-                "', '" + user.LastName +
-                "', '" + user.Email +
-                "', '" + user.Gender +
-                "', '" + user.Active +
-"')";
-        if (_dapper.ExecuteSql(sql))
-        {
-            return Ok();
-        }
-        throw new Exception("Failed to Add User");
-    }
-
     [HttpDelete("DeleteUser/{userId}")]
     public IActionResult DeleteUser(int userId)
     {
-        string sql = @"DELETE FROM TutorialAppSchema.Users WHERE UserId = 
-        " + userId.ToString();
+        string sql = @"EXEC TutorialAppSchema.spUser_Delete
+        @UserId = " + userId.ToString();
         if (_dapper.ExecuteSql(sql))
         {
             return Ok();
