@@ -19,7 +19,7 @@ namespace DotnetAPI.Controllers
     [Authorize]
     [ApiController]
     [Route("[controller]")]
-     public class AuthController : ControllerBase
+    public class AuthController : ControllerBase
     {
         private readonly DataContextDapper _dapper;
         private readonly AuthHelper _authHelper;
@@ -48,37 +48,38 @@ namespace DotnetAPI.Controllers
 
                     byte[] passwordHash = _authHelper.GetPasswordHash(userForRegistration.Password, passwordSalt);
 
-                    string sqlAddAuth = @"INSERT INTO TutorialAppSchema.Auth ([Email],
-                                    [PasswordHash],
-                                    [PasswordSalt]) Values ('" + userForRegistration.Email +
-                                    "', @PasswordHash, @PasswordSalt)";
+                    string sqlAddAuth = @"EXEC TutorialAppSchema.spRegistration_Upsert
+                        @Email = @EmailParameter, 
+                        @PasswordHash =  @PasswordHashParam, 
+                        @PasswordSalt = @PasswordSaltParam";
 
                     List<SqlParameter> sqlParameters = new List<SqlParameter>();
 
-                    SqlParameter passwordSaltParameter = new SqlParameter("@PasswordSalt", SqlDbType.VarBinary);
-                    passwordSaltParameter.Value = passwordSalt;
-
-                    SqlParameter passwordHashParameter = new SqlParameter("@PasswordHash", SqlDbType.VarBinary);
+                    SqlParameter passwordHashParameter = new SqlParameter("@PasswordHashParam", SqlDbType.VarBinary);
                     passwordHashParameter.Value = passwordHash;
-
-                    sqlParameters.Add(passwordSaltParameter);
                     sqlParameters.Add(passwordHashParameter);
+
+                    SqlParameter passwordSaltParameter = new SqlParameter("@PasswordSaltParam", SqlDbType.VarBinary);
+                    passwordSaltParameter.Value = passwordSalt;
+                    sqlParameters.Add(passwordSaltParameter);
+
+                    SqlParameter emailParameter = new SqlParameter("@EmailParameter", SqlDbType.VarChar);
+                    emailParameter.Value = userForRegistration.Email;
+                    sqlParameters.Add(emailParameter);
+
+
 
                     if (_dapper.ExecuteSqlWithParameters(sqlAddAuth, sqlParameters))
                     {
-                        string sqlAddUser = @"
-                                    INSERT INTO TutorialAppSchema.Users(
-                                        [FirstName],
-                                        [LastName],
-                                        [Email],
-                                        [Gender],
-                                        [Active]
-                                ) VALUES (" +
-                                          "'" + userForRegistration.FirstName +
-                                              "', '" + userForRegistration.LastName +
-                                              "', '" + userForRegistration.Email +
-                                              "', '" + userForRegistration.Gender +
-                                              "', 1)";
+                        string sqlAddUser = @"EXEC TutorialAppSchema.spUser_Upsert
+                            @FirstName = '" + userForRegistration.FirstName +
+                        "', @LastName = '" + userForRegistration.LastName +
+                        "', @Email =  '" + userForRegistration.Email +
+                        "', @Gender =  '" + userForRegistration.Gender +
+                        "', @Active = 1" +
+                        ",  @JobTitle = '" + userForRegistration.JobTitle +
+                        "', @Department = '" + userForRegistration.Department +
+                        "', @Salary = '" + userForRegistration.Salary + "'";
                         if (_dapper.ExecuteSql(sqlAddUser))
                         {
                             return Ok();
@@ -113,7 +114,7 @@ namespace DotnetAPI.Controllers
 
             string userIdSql = @"
             SELECT UserId FROM TutorialAppSchema.Users 
-            WHERE Email = '" + userForLogin.Email + "'"; 
+            WHERE Email = '" + userForLogin.Email + "'";
 
             int userId = _dapper.LoadDataSingle<int>(userIdSql);
 
@@ -126,7 +127,7 @@ namespace DotnetAPI.Controllers
         public IActionResult RefreshToken()
         {
             string userId = User.FindFirst("userId")?.Value + "";
-           
+
             string userIdSql = "SELECT UserId FROM TutorialAppSchema.Users WHERE UserId = "
             + userId;
             int userIdFromDB = _dapper.LoadDataSingle<int>(userIdSql);
