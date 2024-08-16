@@ -69,9 +69,5 @@ D:\DotnetAPI\bin\Debug\net8.0\runtimes\win-arm64\native\Microsoft.Data.SqlClient
 D:\DotnetAPI\bin\Debug\net8.0\runtimes\win-x64\native\Microsoft.Data.SqlClient.SNI.dll
 D:\DotnetAPI\bin\Debug\net8.0\runtimes\win-x86\native\Microsoft.Data.SqlClient.SNI.dll
 D:\DotnetAPI\bin\Debug\net8.0\runtimes\win\lib\net8.0\System.Runtime.Caching.dll
-D:\DotnetAPI\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.dll
-D:\DotnetAPI\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.Abstractions.dll
-D:\DotnetAPI\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.Relational.dll
-D:\DotnetAPI\bin\Debug\net8.0\Microsoft.EntityFrameworkCore.SqlServer.dll
 D:\DotnetAPI\obj\Debug\net8.0\DotnetAPI.sourcelink.json
 D:\DotnetAPI\bin\Debug\net8.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
