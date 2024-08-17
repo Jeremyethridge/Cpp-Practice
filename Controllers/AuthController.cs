@@ -93,6 +93,7 @@ namespace DotnetAPI.Controllers
                     // sqlParameters.Add(emailParameter);
 
 
+
                     sqlParameters.Add("@Emailparameter", userForLogin.Email, DbType.String);
 
 
@@ -102,6 +103,8 @@ namespace DotnetAPI.Controllers
 
             for (int i = 0; i < passwordHash.Length; i++)
             {
+
+
                 if (passwordHash[i] != userForConfirmation.PasswordHash[i])
                 {
                     return StatusCode(StatusCodes.Status401Unauthorized, "Incorrect Password");

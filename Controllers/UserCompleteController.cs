@@ -1,8 +1,9 @@
- using System.Data;
+using System.Data;
 using DotnetAPI.Data;
 using DotnetAPI.Dtos;
 using DotnetAPI.Models;
 using Microsoft.AspNetCore.Mvc;
+
 
 namespace DotnetAPI.Controllers;
 [ApiController]
@@ -16,24 +17,27 @@ public class UserCompleteController : ControllerBase
     }
 
     [HttpGet("GetUsers{userId}/{isActive}")]
-    // public IActionResult Test()
     public IEnumerable<UserComplete> GetUsers(int userId, bool isActive)
     {
         string sql = @"EXEC TutorialAppSchema.spUsers_Get";
-        string parameters = "";
+        string stringParameters = "";
+        DynamicParameters sqlParameters = new DynamicParameters();
 
         if (userId != 0)
         {
-            parameters += ", @UserId =" + userId.ToString();
+            stringParameters += ", @UserId = @UserIdParameter";
+            sqlParameters.Add("@UserIdParameter", userId, DbType.Int32);
         }
         if (isActive)
         {
-            parameters += ", @Active =" + isActive.ToString();
+            stringParameters += ", @Active = @ActiveParametere";
+            sqlParameters.Add("@ActiveParameter", isActive, DbType.Boolean);
+
         }
 
-        sql += parameters.Substring(1);
+        sql += stringParameters.Substring(1);
 
-        IEnumerable<UserComplete> users = _dapper.LoadData<UserComplete>(sql);
+        IEnumerable<UserComplete> users = _dapper.LoadDataWithParams<UserComplete>(sql, sqlParameters);
         return users;
     }
 
@@ -42,17 +46,29 @@ public class UserCompleteController : ControllerBase
     public IActionResult UpsertUser(UserComplete user)
     {
         string sql = @"EXEC TutorialAppSchema.spUser_Upsert
-                     @FirstName = '" + user.FirstName +
-                 "', @LastName = '" + user.LastName +
-                 "', @Email =  '" + user.Email +
-                "',  @Gender =  '" + user.Gender +
-                 "', @Active = '" + user.Active +
-                 "', @JobTitle = '" + user.JobTitle +
-                 "', @Department = '" + user.Department +
-                 "', @Salary = '" + user.Salary +
-                 "', @UserId = " + user.UserId;
-        
-        if (_dapper.ExecuteSql(sql))
+                     @FirstName = @FirstNameParameter,
+                     @LastName = @LastNameParameter,
+                     @Email =  @EmailParameter,
+                     @Gender =  @GenderParameter,
+                     @Active = @ActiveParameter,
+                     @JobTitle = @JobTitleParameter,
+                     @Department = @DepartmentParameter,
+                     @Salary = @SalaryParameter,
+                     @UserId = @UserIdParameter";
+
+        DynamicParameters sqlParameters = new DynamicParameters();
+
+        sqlParameters.Add("@FirstNameParameter", user.FirstName, DbType.string);
+        sqlParameters.Add("@LastNameParameter", user.LastName, DbType.string);
+        sqlParameters.Add("@EmailParameter", user.Email, DbType.string);
+        sqlParameters.Add("@GenderParameter", user.Gender, DbType.string);
+        sqlParameters.Add("@ActiveParameter", user.Active, DbType.Boolean);
+        sqlParameters.Add("@JobTitleParameter", user.JobTitle, DbType.string);
+        sqlParameters.Add("@DepartmentParameter", user.Department, DbType.string);
+        sqlParameters.Add("@SalaryParameter", user.Salary, DbType.Decimal);
+        sqlParameters.Add("@UserIdParameter", user.UserId, DbType.Int32);
+
+        if (_dapper.ExecuteSqlWithParameters(sql, sqlParameters))
         {
             return Ok();
         }
@@ -63,8 +79,12 @@ public class UserCompleteController : ControllerBase
     public IActionResult DeleteUser(int userId)
     {
         string sql = @"EXEC TutorialAppSchema.spUser_Delete
-        @UserId = " + userId.ToString();
-        if (_dapper.ExecuteSql(sql))
+        @UserId = @UserIdParameter";
+
+        DynamicParameters sqlParameters = new DynamicParameters();
+        sqlParameters.Add("@UserIdParameter", userId, DbType.Int32);
+
+        if (_dapper.ExecuteSqlWithParameters(sql, sqlParameters))
         {
             return Ok();
         }

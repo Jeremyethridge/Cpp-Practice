@@ -81,6 +81,7 @@ namespace DotnetAPI.Helpers
                         @Email = @EmailParameter, 
                         @PasswordHash =  @PasswordHashParam, 
                         @PasswordSalt = @PasswordSaltParam";
+                    
 
                     DynamicParameters sqlParameters = new DynamicParameters();
 
