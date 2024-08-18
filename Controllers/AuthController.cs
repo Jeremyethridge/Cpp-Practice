@@ -88,12 +88,6 @@ namespace DotnetAPI.Controllers
 
             DynamicParameters sqlParameters = new DynamicParameters();
 
-                    // SqlParameter emailParameter = new SqlParameter("@EmailParameter", SqlDbType.VarChar);
-                    // emailParameter.Value = userForLogin.Email;
-                    // sqlParameters.Add(emailParameter);
-
-
-
                     sqlParameters.Add("@Emailparameter", userForLogin.Email, DbType.String);
 
 
