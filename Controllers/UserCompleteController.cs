@@ -1,9 +1,8 @@
 using System.Data;
 using DotnetAPI.Data;
-using DotnetAPI.Dtos;
 using DotnetAPI.Models;
 using Microsoft.AspNetCore.Mvc;
-
+using Dapper;
 
 namespace DotnetAPI.Controllers;
 [ApiController]
@@ -32,7 +31,6 @@ public class UserCompleteController : ControllerBase
         {
             stringParameters += ", @Active = @ActiveParametere";
             sqlParameters.Add("@ActiveParameter", isActive, DbType.Boolean);
-
         }
 
         sql += stringParameters.Substring(1);
@@ -58,13 +56,13 @@ public class UserCompleteController : ControllerBase
 
         DynamicParameters sqlParameters = new DynamicParameters();
 
-        sqlParameters.Add("@FirstNameParameter", user.FirstName, DbType.string);
-        sqlParameters.Add("@LastNameParameter", user.LastName, DbType.string);
-        sqlParameters.Add("@EmailParameter", user.Email, DbType.string);
-        sqlParameters.Add("@GenderParameter", user.Gender, DbType.string);
+        sqlParameters.Add("@FirstNameParameter", user.FirstName, DbType.String);
+        sqlParameters.Add("@LastNameParameter", user.LastName, DbType.String);
+        sqlParameters.Add("@EmailParameter", user.Email, DbType.String);
+        sqlParameters.Add("@GenderParameter", user.Gender, DbType.String);
         sqlParameters.Add("@ActiveParameter", user.Active, DbType.Boolean);
-        sqlParameters.Add("@JobTitleParameter", user.JobTitle, DbType.string);
-        sqlParameters.Add("@DepartmentParameter", user.Department, DbType.string);
+        sqlParameters.Add("@JobTitleParameter", user.JobTitle, DbType.String);
+        sqlParameters.Add("@DepartmentParameter", user.Department, DbType.String);
         sqlParameters.Add("@SalaryParameter", user.Salary, DbType.Decimal);
         sqlParameters.Add("@UserIdParameter", user.UserId, DbType.Int32);
 
