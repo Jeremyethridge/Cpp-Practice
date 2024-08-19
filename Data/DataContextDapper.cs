@@ -4,7 +4,7 @@ using Microsoft.Data.SqlClient;
 
 namespace DotnetAPI.Data
 {
-     class DataContextDapper  {
+     public class DataContextDapper  {
 
         private readonly IConfiguration _config;
         public DataContextDapper(IConfiguration config)
@@ -28,7 +28,6 @@ namespace DotnetAPI.Data
         public bool ExecuteSql(string sql)
         {
             IDbConnection dbConnection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-            // Bool is 1 or 0 and 1 is true 0 is false
             return dbConnection.Execute(sql) > 0;
         }
         public int ExecuteWithRows(string sql)

@@ -1,19 +1,13 @@
 using System.Data;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Security.Cryptography.Xml;
-using System.Text;
+using AutoMapper;
 using Dapper;
 using DotnetAPI.Data;
 using DotnetAPI.Dtos;
 using DotnetAPI.Helpers;
 using DotnetAPI.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
-using Microsoft.IdentityModel.Tokens;
+
 
 namespace DotnetAPI.Controllers
 {
@@ -24,10 +18,17 @@ namespace DotnetAPI.Controllers
     {
         private readonly DataContextDapper _dapper;
         private readonly AuthHelper _authHelper;
+        private readonly ReusableSql _reusableSql;
+        private readonly IMapper _mapper;
         public AuthController(IConfiguration config)
         {
             _dapper = new DataContextDapper(config);
             _authHelper = new AuthHelper(config);
+            _reusableSql = new ReusableSql(config);
+            _mapper = new Mapper(new MapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<UserForRegistrationDTO, UserComplete>();
+            }));
         }
         [AllowAnonymous]
         [HttpPost("Register")]
@@ -40,22 +41,17 @@ namespace DotnetAPI.Controllers
                 IEnumerable<string> existingUsers = _dapper.LoadData<string>(sqlCheckUserExist);
                 if (existingUsers.Count() == 0)
                 {
-                    UserForLoginDTO userForSetPassword = new UserForLoginDTO() {
+                    UserForLoginDTO userForSetPassword = new UserForLoginDTO()
+                    {
                         Email = userForRegistration.Email,
                         Password = userForRegistration.Password
                     };
                     if (_authHelper.Setpassword(userForSetPassword))
                     {
-                        string sqlAddUser = @"EXEC TutorialAppSchema.spUser_Upsert
-                            @FirstName = '" + userForRegistration.FirstName +
-                        "', @LastName = '" + userForRegistration.LastName +
-                        "', @Email =  '" + userForRegistration.Email +
-                        "', @Gender =  '" + userForRegistration.Gender +
-                        "', @Active = 1" +
-                        ",  @JobTitle = '" + userForRegistration.JobTitle +
-                        "', @Department = '" + userForRegistration.Department +
-                        "', @Salary = '" + userForRegistration.Salary + "'";
-                        if (_dapper.ExecuteSql(sqlAddUser))
+                        UserComplete userComplete = _mapper.Map<UserComplete>(userForRegistration);
+                        userComplete.Active = true;
+
+                        if (_reusableSql.UpsertUser(userComplete))
                         {
                             return Ok();
                         }
@@ -71,7 +67,7 @@ namespace DotnetAPI.Controllers
         [HttpPut("ResetPassword")]
         public IActionResult ResetPassword(UserForLoginDTO userForSetPassword)
         {
-            if(_authHelper.Setpassword(userForSetPassword))
+            if (_authHelper.Setpassword(userForSetPassword))
             {
                 return Ok();
             }
@@ -82,14 +78,12 @@ namespace DotnetAPI.Controllers
         [HttpPost("Login")]
         public IActionResult Login(UserForLoginDTO userForLogin)
         {
-
             string sqlForHashAndSalt = @"EXEC TutorialAppSchema.spLoginConfirmation_Get 
             @Email = @EmailParameter";
 
             DynamicParameters sqlParameters = new DynamicParameters();
 
-                    sqlParameters.Add("@Emailparameter", userForLogin.Email, DbType.String);
-
+            sqlParameters.Add("@Emailparameter", userForLogin.Email, DbType.String);
 
             UserForLoginConfirmationDTO userForConfirmation = _dapper.LoadDataSingleWithParams<UserForLoginConfirmationDTO>(sqlForHashAndSalt, sqlParameters);
 
@@ -97,8 +91,6 @@ namespace DotnetAPI.Controllers
 
             for (int i = 0; i < passwordHash.Length; i++)
             {
-
-
                 if (passwordHash[i] != userForConfirmation.PasswordHash[i])
                 {
                     return StatusCode(StatusCodes.Status401Unauthorized, "Incorrect Password");
@@ -115,7 +107,6 @@ namespace DotnetAPI.Controllers
                 {"token", _authHelper.CreateToken(userId)}
             });
         }
-
         [HttpGet("RefreshToken")]
         public IActionResult RefreshToken()
         {

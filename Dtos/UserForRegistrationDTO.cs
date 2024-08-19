@@ -11,5 +11,6 @@ namespace DotnetAPI.Dtos
         public decimal Salary { get; set; } 
         public string JobTitle { get; set; } = "";
         public string Department { get; set; } = "";
+        public bool Active { get; set; }
     }
 }
