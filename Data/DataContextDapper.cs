@@ -54,6 +54,5 @@ namespace DotnetAPI.Data
             IDbConnection dbConnection = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
             return dbConnection.QuerySingle<T>(sql, parameters);
         }
-        
     }
 }

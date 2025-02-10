@@ -45,10 +45,8 @@ namespace DotnetAPI.Controllers
             {
                 sql += stringParameters.Substring(1);
             }
-
             return _dapper.LoadDataWithParams<Post>(sql, sqlParameters);
         }
-
 
         [HttpGet("MyPost/{userId}")]
         public IEnumerable<Post> GetMyPost()
@@ -78,7 +76,6 @@ namespace DotnetAPI.Controllers
                 sqlParameters.Add("@PostIdParameter", postToUpsert.PostId, DbType.Int32);
             }
 
-
             if (_dapper.ExecuteSqlWithParameters(sql, sqlParameters))
             {
                 return Ok();
@@ -97,7 +94,7 @@ namespace DotnetAPI.Controllers
             sqlParameters.Add("@PostIdParameter", postId, DbType.Int32);
             sqlParameters.Add("@UserIdParameter", this.User.FindFirst("userId")?.Value, DbType.Int32);
 
-            if (_dapper.ExecuteSqlWithParameters(sql, sqlParameters))
+            if(_dapper.ExecuteSqlWithParameters(sql, sqlParameters))
             {
                 return Ok();
             }
