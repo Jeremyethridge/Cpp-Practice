@@ -71,3 +71,6 @@ D:\DotnetAPI\obj\Debug\net8.0\refint\DotnetAPI.dll
 D:\DotnetAPI\obj\Debug\net8.0\DotnetAPI.pdb
 D:\DotnetAPI\obj\Debug\net8.0\DotnetAPI.genruntimeconfig.cache
 D:\DotnetAPI\obj\Debug\net8.0\ref\DotnetAPI.dll
+D:\DotnetAPI\bin\Debug\net8.0\DotnetAPI.staticwebassets.endpoints.json
+D:\DotnetAPI\obj\Debug\net8.0\staticwebassets.build.endpoints.json
+D:\DotnetAPI\obj\Debug\net8.0\staticwebassets\msbuild.DotnetAPI.Microsoft.AspNetCore.StaticWebAssetEndpoints.props
